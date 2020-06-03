@@ -38,7 +38,6 @@ class GA:
         self.fig, self.ax = self.initialize_progress_plot()
         self.fig_xlims = [0, 0]
         self.fig_zlims = [0, 0]
-        self.plot_data = {}
 
     def initialize_population(self):
         """
@@ -187,26 +186,12 @@ class GA:
             self.fig_xlims = [0, np.max(x)]
             self.fig_zlims = [0, np.max(top)]
 
-            self.plot_data['x'] = []
-            self.plot_data['y'] = []
-            self.plot_data['z'] = []
-            self.plot_data['dx'] = []
-            self.plot_data['dy'] = []
-            self.plot_data['dz'] = []
-
         else:
             self.fig_xlims = [0, max(self.fig_xlims[1], np.max(x))]
             self.fig_zlims = [0, max(self.fig_zlims[1], np.max(top))]
 
         self.ax.set_xlim(self.fig_xlims)
         self.ax.set_zlim(self.fig_zlims)
-
-        self.plot_data['x'] += [x]
-        self.plot_data['y'] += [y]
-        self.plot_data['z'] += [bottom]
-        self.plot_data['dx'] += [width]
-        self.plot_data['dy'] += [depth]
-        self.plot_data['dz'] += [top]
 
         red = Color("#0092E5")
         colors = list(red.range_to(Color("#B1BF00"), self.m_iter))
