@@ -24,6 +24,7 @@ class Agent:
             assert 0.5 <= alpha <= 1
 
         self.alpha = alpha if alpha is not None else 1
+        #self.alpha = alpha if alpha is not None else np.random.uniform(0.5,1)
         self.x = x if x is not None else np.exp(np.random.uniform(0, 2))
 
         self.k = k
@@ -81,6 +82,7 @@ class Agent:
         # Perform the mutations
         mu = np.random.normal(loc=0.0, scale=self.mutation_std)
         offspring.x = offspring.x + mu * offspring.x
+        #offspring.alpha = offspring.alpha + mu * offspring.alpha
 
         # Make sure new parameters fulfill the constraints
         offspring.check_param_constraints()
@@ -95,3 +97,7 @@ class Agent:
 
         if self.x < 0:
             self.x = 0
+        if self.alpha < 0.5:
+            self.alpha = 0.5
+        if self.alpha > 1:
+           self.alpha = 1
