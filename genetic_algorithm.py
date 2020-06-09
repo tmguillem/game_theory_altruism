@@ -1,9 +1,6 @@
 import numpy as np
 from tqdm import tqdm
 from agent import Agent
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from colour import Color
 
 
 class GA:
@@ -45,8 +42,8 @@ class GA:
         self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
 
-        self.fig, self.ax, self.ax1 = self.initialize_progress_plot()
-        
+        # self.fig, self.ax, self.ax1 = self.initialize_progress_plot()
+
         self.fig_xlims = [0, 0]
         self.fig_zlims = [0, 0]
 
@@ -58,53 +55,6 @@ class GA:
 
         return [Agent(k=self.k, m=self.m, mu=self.mutation, alpha=self.alpha, mutable_variables=self.mutable_params)
                 for _ in range(self.n)]
-
-    def initialize_progress_plot(self):
-        """
-        Initializes a 3D plot to track the evolution of the population
-        :return: a matplotlib figure and axis of where to plot the evolution
-        """
-
-        fig = plt.figure()
-        fig.show()
-
-        mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-
-        ax = fig.add_subplot(211, projection='3d')
-        ax.view_init(90, 0)
-        
-        ax.set_ylim([0, self.m_iter + 1])
-     
-        # Plot theoretical equilibrium point (equation 11)
-        x_tilde = self.alpha * self.m / (2 * self.alpha - self.k)
-
-        # previous equilibrium eq.7 for var 1
-        # x_tilde = self.m / (2 - self.k)
-        ax.plot(x_tilde * np.ones(self.m_iter + 2), np.arange(0, self.m_iter + 2), np.zeros(self.m_iter + 2), 'k',
-                linewidth=5, alpha=0.7)
-        ax.plot(x_tilde * np.ones(self.m_iter + 2), np.zeros(self.m_iter + 2), np.linspace(0, 1, self.m_iter + 2),
-                'k', linewidth=5, alpha=0.7)
-
-        ax.set_xlabel('Strategy histogram')
-        ax.set_ylabel('Evolution iteration')
-        ax.set_zlabel('Population percentage')
-        ax.invert_yaxis()
-        
-        # Second graph to plot alpha
-        ax1 = fig.add_subplot(212, projection='3d')
-        ax1.view_init(90, 0)
-        
-        ax1.set_ylim([0, self.m_iter + 1])
-        ax1.set_xlabel('Alpha histogram')
-        ax1.set_ylabel('Evolution iteration')
-        ax1.set_zlabel('Population percentage')
-        ax1.invert_yaxis()
-
-        fig.canvas.draw()
-        plt.draw()
-        
-        return fig, ax, ax1
 
     def make_pairs(self, algorithm):
         """
@@ -165,7 +115,9 @@ class GA:
         The core loop of the Evolutionary algorithm
         """
 
-        for i in tqdm(range(self.m_iter)):
+        population_summary = self.population_state_summary(initialize=True)
+
+        for _ in tqdm(range(self.m_iter)):
 
             pairings = self.make_pairs(algorithm="random")
 
@@ -187,71 +139,34 @@ class GA:
             # Reproduce population using the utilities as reproduction probability
             self.reproduce(utilities)
 
-            # Do interesting plots about the population state
-            self.plot_population_state(i)
-        plt.show()
+            # Summarize state of population
+            population_summary = self.population_state_summary(current_summary=population_summary)
 
-    def plot_population_state(self, it):
+        return population_summary
 
-        # Get strategies from agents
-        x = [agent.x for agent in self.population]
-        bins, hist = np.histogram(x, bins=15)
+    def population_state_summary(self, initialize=False, current_summary=None):
+        """
+        Resumes the state of the population in a dictionary. If initialize=True, then a new dictionary is created
+        with no content. Else, the current_summary is extended with the current state.
+        :param initialize: True if no evolution has happened yet and a new dictionary must be created
+        :param current_summary: Used if initialize=False. Past states of the population. Will be extended with the new
+        information from the current state
+        :return: The updated (or new) dictionary with the population state information.
+        """
 
-        width = hist[1] - hist[0]
-
-        x = hist[:-1] + width / 2
-        y = np.ones_like(x) * (it)
-
-        bottom = np.zeros_like(x)
-        top = bins / np.sum(bins)
-        depth = np.ones_like(x)
-        width = width * np.ones_like(x)
-
-        if it == 0:
-            self.fig_xlims = [0, np.max(x)]
-            self.fig_zlims = [0, np.max(top)]
+        if initialize:
+            # Initialize the summary dictionary, as no evolution has happened yet
+            current_summary = {"x": np.zeros((0, self.n)),
+                               "alpha": np.zeros((0, self.n))}
 
         else:
-            self.fig_xlims = [0, max(self.fig_xlims[1], np.max(x))]
-            self.fig_zlims = [0, max(self.fig_zlims[1], np.max(top))]
+            assert isinstance(current_summary, dict)
 
-        self.ax.set_xlim(self.fig_xlims)
-        self.ax.set_zlim(self.fig_zlims)
+            # Add new relevant content to the dictionary
+            current_summary["x"] = np.concatenate(
+                (current_summary["x"], np.array([agent.x for agent in self.population])[np.newaxis, :]), axis=0)
 
-        red = Color("#0092E5")
-        colors = list(red.range_to(Color("#B1BF00"), self.m_iter))
+            current_summary["alpha"] = np.concatenate(
+                (current_summary["alpha"], np.array([agent.alpha for agent in self.population])[np.newaxis, :]), axis=0)
 
-        alpha = it * 0.6 / self.m_iter + 0.2
-        self.ax.bar3d(x, y, bottom, width, depth, top, color=colors[it].rgb + (alpha, ))
-        
-        x = [agent.alpha for agent in self.population]
-        bins, hist = np.histogram(x, bins=15)
-
-        width = hist[1] - hist[0]
-
-        x = hist[:-1] + width / 2
-        y = np.ones_like(x) * (it)
-
-        bottom = np.zeros_like(x)
-        top = bins / np.sum(bins)
-        depth = np.ones_like(x)
-        width = width * np.ones_like(x)
-
-        if it == 0:
-            self.fig_xlims = [0, np.max(x)]
-            self.fig_zlims = [0, np.max(top)]
-
-        else:
-            self.fig_xlims = [0, max(self.fig_xlims[1], np.max(x))]
-            self.fig_zlims = [0, max(self.fig_zlims[1], np.max(top))]
-
-        self.ax1.set_xlim(self.fig_xlims)
-        self.ax1.set_zlim(self.fig_zlims)
-
-        red = Color("#0092E5")
-        colors = list(red.range_to(Color("#B1BF00"), self.m_iter))
-
-        alpha = it * 0.6 / self.m_iter + 0.2
-        self.ax1.bar3d(x, y, bottom, width, depth, top, color=colors[it].rgb + (alpha, ))
-        
-    
+        return current_summary

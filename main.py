@@ -1,4 +1,3 @@
-import numpy as np
 from arguments import get_argument_parser
 from genetic_algorithm import GA
 
