@@ -12,6 +12,13 @@ def main():
         # Will result in randomly generated alphas for each individual.
         alpha = None
 
+    if not args.random_x:
+        # Use pre-defined x in arguments
+        x = args.x
+    else:
+        # Will result in randomly generated x's for each individual.
+        x = None
+
     mutable_params = []
     if args.alpha_mutable:
         mutable_params += ['alpha']
@@ -20,7 +27,8 @@ def main():
 
     genetic_algo = GA(n_population=args.population, m_iterations=args.iterations,
                       k=args.k, m=args.m,
-                      mu=args.mu, alpha=alpha,
+                      mu=args.mu,
+                      x_init=x, alpha_init=alpha,
                       mutable_parameters=mutable_params)
 
     genetic_algo.run()

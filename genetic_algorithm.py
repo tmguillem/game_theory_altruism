@@ -8,7 +8,7 @@ class GA:
     Class that implements the evolutionary algorithm (genetic algorithm, GA)
     """
 
-    def __init__(self, n_population, m_iterations, k, m, mu, alpha, mutable_parameters):
+    def __init__(self, n_population, m_iterations, k, m, mu, x_init, alpha_init, mutable_parameters):
         """
         Initializes the genetic algorithm with a population of individuals.
         :param n_population: number of individuals in the simulation. Will remain constant
@@ -18,7 +18,8 @@ class GA:
         :param k: externality parameter for agent interaction
         :param m: self-utility parameter for agent interaction
         :param mu: mutation standard deviation parameter for agent reproduction
-        :param alpha: pre-set alpha parameter for population. If None, alpha is random.
+        :param x_init: pre-set x parameter for the population. If None, x is random.
+        :param alpha_init: pre-set alpha parameter for population. If None, alpha is random.
         :param mutable_parameters: list of the parameters of the agents that are subject to mutation. None if no
         mutable parameters.
         """
@@ -36,16 +37,14 @@ class GA:
         # Mutation std
         self.mutation = mu
 
+        # x parameter (if None, randomized)
+        self.x = x_init
+
         # Alpha parameter (if None, randomized)
-        self.alpha = alpha
+        self.alpha = alpha_init
 
         self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
-
-        # self.fig, self.ax, self.ax1 = self.initialize_progress_plot()
-
-        self.fig_xlims = [0, 0]
-        self.fig_zlims = [0, 0]
 
     def initialize_population(self):
         """
@@ -53,7 +52,8 @@ class GA:
         :return: A list with all the agents of the simulation
         """
 
-        return [Agent(k=self.k, m=self.m, mu=self.mutation, alpha=self.alpha, mutable_variables=self.mutable_params)
+        return [Agent(k=self.k, m=self.m, mu=self.mutation, x=self.x, alpha=self.alpha,
+                      mutable_variables=self.mutable_params)
                 for _ in range(self.n)]
 
     def make_pairs(self, algorithm):
@@ -105,7 +105,8 @@ class GA:
         """
 
         utilities = np.array([agent.utility for agent in self.population])
-        utilities = utilities - np.min(utilities)
+        neg_utility = utilities[utilities < 0]
+        utilities = utilities - np.min(neg_utility) if np.any(neg_utility) else utilities
         utilities = utilities / np.sum(utilities)
 
         return utilities
@@ -159,14 +160,13 @@ class GA:
             current_summary = {"x": np.zeros((0, self.n)),
                                "alpha": np.zeros((0, self.n))}
 
-        else:
-            assert isinstance(current_summary, dict)
+        assert isinstance(current_summary, dict)
 
-            # Add new relevant content to the dictionary
-            current_summary["x"] = np.concatenate(
-                (current_summary["x"], np.array([agent.x for agent in self.population])[np.newaxis, :]), axis=0)
+        # Add new relevant content to the dictionary
+        current_summary["x"] = np.concatenate(
+            (current_summary["x"], np.array([agent.x for agent in self.population])[np.newaxis, :]), axis=0)
 
-            current_summary["alpha"] = np.concatenate(
-                (current_summary["alpha"], np.array([agent.alpha for agent in self.population])[np.newaxis, :]), axis=0)
+        current_summary["alpha"] = np.concatenate(
+            (current_summary["alpha"], np.array([agent.alpha for agent in self.population])[np.newaxis, :]), axis=0)
 
         return current_summary

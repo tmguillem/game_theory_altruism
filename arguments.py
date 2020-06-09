@@ -26,6 +26,10 @@ def get_argument_parser():
                         help='If true, alpha will be subject to evolution mutations.')
     parser.set_defaults(x_mutable=False)
 
+    parser.add_argument('--random_x', dest='random_x',
+                        help='If true, all x are initialized at random')
+    parser.set_defaults(random_x=False)
+
     parser.add_argument('--random_alpha', dest='random_alpha',
                         help='If true, all alphas are initialized at random')
     parser.set_defaults(random_alpha=False)

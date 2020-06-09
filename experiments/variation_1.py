@@ -16,11 +16,13 @@ def main():
     k = 0.5
     m = 0.5
     mu = 0.1
+    x = 0.9
     alpha = 1
     mutable_params = ['x']
 
     genetic_algo = GA(n_population=population, m_iterations=iterations,
-                      k=k, m=m, mu=mu, alpha=alpha,
+                      k=k, m=m, mu=mu,
+                      x_init=x, alpha_init=alpha,
                       mutable_parameters=mutable_params)
 
     summary = genetic_algo.run()
@@ -35,7 +37,7 @@ def main():
     y = np.zeros(0)
     c = np.zeros(0)
 
-    for it in range(iterations):
+    for it in range(iterations + 1):
 
         # Get strategies from agents
         bins, hist = np.histogram(summary['x'][it, :], bins=bins_general)
@@ -45,7 +47,7 @@ def main():
 
     ax.grid()
 
-    histograms = ax.scatter(x, y, c=c, cmap='hot')
+    histograms = ax.scatter(x, y, c=c, cmap='hot', edgecolors='k')
 
     # Plot theoretical value
     xlim = ax.get_xlim()
