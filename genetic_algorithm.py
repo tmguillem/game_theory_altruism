@@ -71,9 +71,9 @@ class GA:
         x_tilde = alpha*self.m/(2*alpha-self.k)
         # previous equilibrium eq.7 for var 1
         # x_tilde = self.m / (2 - self.k)
-        ax.plot(x_tilde * np.ones(self.m_iter + 2), np.arange(0, self.m_iter + 2), np.zeros(self.m_iter + 2), 'k',
+        ax1.plot(x_tilde * np.ones(self.m_iter + 2), np.arange(0, self.m_iter + 2), np.zeros(self.m_iter + 2), 'k',
                 linewidth=5, alpha=0.7)
-        ax.plot(x_tilde * np.ones(self.m_iter + 2), np.zeros(self.m_iter + 2), np.linspace(0, 1, self.m_iter + 2),
+        ax1.plot(x_tilde * np.ones(self.m_iter + 2), np.zeros(self.m_iter + 2), np.linspace(0, 1, self.m_iter + 2),
                 'k', linewidth=5, alpha=0.7)
 
         ax.set_xlabel('Strategy histogram')
