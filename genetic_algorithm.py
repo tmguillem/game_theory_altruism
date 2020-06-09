@@ -11,7 +11,7 @@ class GA:
     Class that implements the evolutionary algorithm (genetic algorithm, GA)
     """
 
-    def __init__(self, n_population, m_iterations, k, m, mu):
+    def __init__(self, n_population, m_iterations, k, m, mu, alpha, mutable_parameters):
         """
         Initializes the genetic algorithm with a population of individuals.
         :param n_population: number of individuals in the simulation. Will remain constant
@@ -21,6 +21,9 @@ class GA:
         :param k: externality parameter for agent interaction
         :param m: self-utility parameter for agent interaction
         :param mu: mutation standard deviation parameter for agent reproduction
+        :param alpha: pre-set alpha parameter for population. If None, alpha is random.
+        :param mutable_parameters: list of the parameters of the agents that are subject to mutation. None if no
+        mutable parameters.
         """
 
         assert divmod(n_population, 2)[1] == 0, "Population must be an even number so n/2 pairings can bee made."
@@ -28,11 +31,18 @@ class GA:
         self.n = n_population
         self.m_iter = m_iterations
 
+        # Externality
         self.k = k
+        # Self-utility
         self.m = m
 
+        # Mutation std
         self.mutation = mu
 
+        # Alpha parameter (if None, randomized)
+        self.alpha = alpha
+
+        self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
 
         self.fig, self.ax, self.ax1 = self.initialize_progress_plot()
@@ -46,7 +56,8 @@ class GA:
         :return: A list with all the agents of the simulation
         """
 
-        return [Agent(k=self.k, m=self.m, mu=self.mutation) for _ in range(self.n)]
+        return [Agent(k=self.k, m=self.m, mu=self.mutation, alpha=self.alpha, mutable_variables=self.mutable_params)
+                for _ in range(self.n)]
 
     def initialize_progress_plot(self):
         """
@@ -60,15 +71,14 @@ class GA:
         mng = plt.get_current_fig_manager()
         mng.resize(*mng.window.maxsize())
 
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(211, projection='3d')
+        ax.view_init(90, 0)
         
         ax.set_ylim([0, self.m_iter + 1])
      
         # Plot theoretical equilibrium point (equation 11)
-        # not sure if there's a better way to fetch alpha value
-        alpha = self.population[1].alpha
-       
-        x_tilde = alpha*self.m/(2*alpha-self.k)
+        x_tilde = self.alpha * self.m / (2 * self.alpha - self.k)
+
         # previous equilibrium eq.7 for var 1
         # x_tilde = self.m / (2 - self.k)
         ax.plot(x_tilde * np.ones(self.m_iter + 2), np.arange(0, self.m_iter + 2), np.zeros(self.m_iter + 2), 'k',
@@ -81,23 +91,20 @@ class GA:
         ax.set_zlabel('Population percentage')
         ax.invert_yaxis()
         
-        #second graph to plot alpha
-        ax1 = fig.add_subplot(211, projection='3d')
+        # Second graph to plot alpha
+        ax1 = fig.add_subplot(212, projection='3d')
+        ax1.view_init(90, 0)
         
         ax1.set_ylim([0, self.m_iter + 1])
         ax1.set_xlabel('Alpha histogram')
         ax1.set_ylabel('Evolution iteration')
         ax1.set_zlabel('Population percentage')
         ax1.invert_yaxis()
-        
-        
-
 
         fig.canvas.draw()
         plt.draw()
         
         return fig, ax, ax1
-    
 
     def make_pairs(self, algorithm):
         """

@@ -3,7 +3,7 @@ import copy
 
 
 class Agent:
-    def __init__(self, k, m, mu=0.1, x=None, alpha=None):
+    def __init__(self, k, m, mu=0.1, x=None, alpha=None, mutable_variables=None):
         """
         Initializes an agent object for the Genetic Algorithm simulation.
 
@@ -11,7 +11,8 @@ class Agent:
         :param m: self-utility parameter. Must fulfill m > 0
         :param mu: mutation standard deviation. Must fulfill mu > 0.
         :param x: a-priori strategy. Must fulfill x >= 0
-        :param alpha: Altruism parameter. Must fulfill 0.5 <= alpha <= 1.0
+        :param alpha: Altruism parameter. Must fulfill 0.5 <= alpha <= 1.0. If None, alpha is randomly initialized.
+        :param mutable_variables: List of variables that are subject to mutations.
         """
 
         assert -1 < k < 1
@@ -22,17 +23,27 @@ class Agent:
             assert x >= 0
         if alpha is not None:
             assert 0.5 <= alpha <= 1
+        else:
+            alpha = np.random.uniform(0.5, 1.0)
 
-        self.alpha = alpha if alpha is not None else 1
-        #self.alpha = alpha if alpha is not None else np.random.uniform(0.5,1)
+        if mutable_variables is None:
+            mutable_variables = []
+
+        # Agent parameters (may be mutated)
+        self.alpha = alpha
         self.x = x if x is not None else np.exp(np.random.uniform(0, 2))
 
+        # Agent hyperparameters (can't be mutated)
         self.k = k
         self.m = m
 
         self.payoff = 0
         self.utility = 0
 
+        # Mutation stuff
+        for var in mutable_variables:
+            assert var in ["alpha", "x"]
+        self.mutable_params = mutable_variables
         self.mutation_std = mu
 
     def compute_payoff(self, x, y):
@@ -80,9 +91,12 @@ class Agent:
         offspring = copy.deepcopy(self)
 
         # Perform the mutations
-        mu = np.random.normal(loc=0.0, scale=self.mutation_std)
-        offspring.x = offspring.x + mu * offspring.x
-        #offspring.alpha = offspring.alpha + mu * offspring.alpha
+        for param in self.mutable_params:
+            mu = np.random.normal(loc=0.0, scale=self.mutation_std)
+            if param == "x":
+                offspring.x = offspring.x + mu * offspring.x
+            elif param == "alpha":
+                offspring.alpha = offspring.alpha + mu * offspring.alpha
 
         # Make sure new parameters fulfill the constraints
         offspring.check_param_constraints()
@@ -100,4 +114,4 @@ class Agent:
         if self.alpha < 0.5:
             self.alpha = 0.5
         if self.alpha > 1:
-           self.alpha = 1
+            self.alpha = 1
