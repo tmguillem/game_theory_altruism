@@ -18,7 +18,7 @@ def main():
     assert variation == 1 or variation == 2
 
     population = 50
-    iterations = 100
+    iterations = 250
     k = 0.5
     m = 0.5
     mu = 0.1
@@ -60,8 +60,14 @@ def main():
     xlim = ax.get_xlim()
     x_tilde = np.linspace(xlim[0], xlim[1], 100)
     y_tilde = m / (2 - k) * np.ones_like(x_tilde)
-    plt.semilogy(x_tilde, y_tilde, color='tab:blue', lw=2, path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
-                 label='Theoretical value', alpha=0.7)
+    plt.semilogy(x_tilde, y_tilde, color='tab:blue', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
+                 lw=2, label='Theoretical value', alpha=0.7)
+
+    # Plot population average
+    x_avg = np.linspace(0, iterations + 1, iterations + 1)
+    y_avg = np.mean(summary['x'], axis=1)
+    plt.semilogy(x_avg, y_avg, color='tab:green', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
+                 lw=2, label='Population average', alpha=0.7)
     ax.legend()
     ax.set_xlim(xlim)
 
