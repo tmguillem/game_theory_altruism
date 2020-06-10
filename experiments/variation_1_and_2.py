@@ -13,7 +13,7 @@ def main():
     """
 
     # Change to 1 or 2 for variations 1 or 2
-    variation = 1
+    variation = 2
 
     assert variation == 1 or variation == 2
 
@@ -35,7 +35,7 @@ def main():
     summary = genetic_algo.run()
 
     # Figure out bins for histograms
-    bins_general = np.linspace(np.min(summary['x']), np.max(summary['x']), 100)
+    bins_general = np.linspace(np.log(np.min(summary['x'])), np.log(np.max(summary['x'])), 100)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -47,8 +47,8 @@ def main():
     for it in range(iterations + 1):
 
         # Get strategies from agents
-        bins, hist = np.histogram(summary['x'][it, :], bins=bins_general)
-        y = np.append(y, hist[np.where(bins != 0)])
+        bins, hist = np.histogram(np.log(summary['x'][it, :]), bins=bins_general)
+        y = np.append(y, np.exp(hist[np.where(bins != 0)]))
         x = np.append(x, np.ones_like(hist[np.where(bins != 0)]) * it)
         c = np.append(c, bins[np.where(bins != 0)] / np.sum(bins))
 
@@ -60,12 +60,12 @@ def main():
     xlim = ax.get_xlim()
     x_tilde = np.linspace(xlim[0], xlim[1], 100)
     y_tilde = m / (2 - k) * np.ones_like(x_tilde)
-    plt.plot(x_tilde, y_tilde, color='tab:blue', lw=2, path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
-             label='Theoretical value', alpha=0.7)
+    plt.semilogy(x_tilde, y_tilde, color='tab:blue', lw=2, path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
+                 label='Theoretical value', alpha=0.7)
     ax.legend()
     ax.set_xlim(xlim)
 
-    ax.set_ylabel('Strategy histogram')
+    ax.set_ylabel('log(x) histogram')
     ax.set_xlabel('Evolution iteration')
     ax.set_title('Variation 1 experiment' if variation == 1 else 'Variation 2 experiment')
     cbar = fig.colorbar(histograms)
