@@ -43,6 +43,9 @@ class GA:
         # Alpha parameter (if None, randomized)
         self.alpha = alpha_init
 
+        # Percentage of lowest fit population to remove before reproduction [0, 1]
+        self.x_remove = 0
+
         self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
 
@@ -93,23 +96,22 @@ class GA:
         # Sample individuals to reproduce from PDF
         to_reproduce = np.random.choice(a, len(a), replace=True, p=reproduction_rate)
 
-        for i in to_reproduce:
-            self.population = self.population + [self.population[i].reproduce()]
+        self.population = [self.population[i].reproduce() for i in to_reproduce]
 
-    def get_and_normalize_utilities(self):
+    @staticmethod
+    def normalize_pdf(params):
         """
-        Gets the utilities of all the current population members and normalizes them to have unit sum, and >=0
-        :return: a numpy array of length n with the utilities of all the current alive agents of the simulation. The
-        utilities are normalizes to have unit sum, and be non-negative.
+        Normalizes a parameter vector so that it corresponds to a valid probability density function: unit sum, and >=0
+        :return: the same vector of parameters but normalized to a valid probability density function. I.e. the sum of
+        all elements equals one, and none of them is negative
         :rtype: np.ndarray
         """
 
-        utilities = np.array([agent.utility for agent in self.population])
-        neg_utility = utilities[utilities < 0]
-        utilities = utilities - np.min(neg_utility) if np.any(neg_utility) else utilities
-        utilities = utilities / np.sum(utilities)
+        negatives = params[params < 0]
+        params = params - np.min(negatives) if np.any(negatives) else params
+        params = params / np.sum(params)
 
-        return utilities
+        return params
 
     def run(self):
         """
@@ -126,19 +128,24 @@ class GA:
             for pairing in pairings:
                 self.population[pairing[0]].interact(self.population[pairing[1]])
 
-            # Sort utilities from small to large
-            utilities = self.get_and_normalize_utilities()
-            ind = np.argsort(utilities)
+            # Sort payoffs from small to large. Use as fitness
+            payoffs = np.array([agent.payoff for agent in self.population])
+            fitness = self.normalize_pdf(payoffs)
+            ind = np.argsort(fitness)
 
-            # Remove worst 50 % of population
-            ind = ind[int(self.n / 2):]
+            # Remove worst x% of population
+            ind = ind[int(self.n * self.x_remove):]
             self.population = [self.population[i] for i in ind]
 
-            # Compute reproduction rate based on utility
-            utilities = utilities[ind] + (1 - np.sum(utilities[ind])) / len(ind)
+            # Distribute lost fitness of removed individuals among surviving individuals
+            fitness = fitness[ind] + (1 - np.sum(fitness[ind])) / len(ind)
 
-            # Reproduce population using the utilities as reproduction probability
-            self.reproduce(utilities)
+            # Correct numerical error
+            if np.any(fitness[fitness < 0]):
+                fitness = fitness - np.min(fitness[fitness < 0])
+
+            # Reproduce population using the fitness score as reproduction probability
+            self.reproduce(fitness)
 
             # Summarize state of population
             population_summary = self.population_state_summary(current_summary=population_summary)
