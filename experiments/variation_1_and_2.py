@@ -6,19 +6,26 @@ import numpy as np
 
 def main():
     """
-    This function runs variation 1. For this variation, the population of individuals is generated with the same
-    initial strategy x, chosen at random. Alpha=1
-    :return:
+    This function runs variation 1 or 2.
+    In variation 1, the population of individuals is generated with the same initial strategy x, which is chosen.
+    In variation 2, the population starts with randomly assigned strategies x (different for every agent).
+    In both cases, we contemplate egoistic players, i.e.: Alpha=1, and only let the strategies x evolve.
     """
+
+    # Change to 1 or 2 for variations 1 or 2
+    variation = 1
+
+    assert variation == 1 or variation == 2
 
     population = 50
     iterations = 100
     k = 0.5
     m = 0.5
     mu = 0.1
-    x = 0.9
     alpha = 1
     mutable_params = ['x']
+
+    x = 0.9 if variation == 1 else None
 
     genetic_algo = GA(n_population=population, m_iterations=iterations,
                       k=k, m=m, mu=mu,
@@ -60,7 +67,7 @@ def main():
 
     ax.set_ylabel('Strategy histogram')
     ax.set_xlabel('Evolution iteration')
-    ax.set_title('Variation 1 experiment')
+    ax.set_title('Variation 1 experiment' if variation == 1 else 'Variation 2 experiment')
     cbar = fig.colorbar(histograms)
     cbar.ax.set_ylabel('Population percentage (N={})'.format(population), rotation=270, labelpad=15)
 
