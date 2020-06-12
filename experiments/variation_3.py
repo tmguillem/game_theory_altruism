@@ -13,14 +13,14 @@ def main():
     We let the strategies x evolve
     """
 
-    population = 50
-    iterations = 100
+    population = 200
+    iterations = 200
     k = 0.5
-    m = 1
+    m = 0.5
     mu = 0.1
-    alpha = 0.7
+    alpha = 0.5
     mutable_params = ['x']
-    x = alpha * m + (2 * alpha + k) / (4 * alpha * alpha - k ** 2)
+    x = None
 
     genetic_algo = GA(n_population=population, m_iterations=iterations,
                       k=k, m=m, mu=mu,
@@ -28,26 +28,17 @@ def main():
                       mutable_parameters=mutable_params)
 
     summary = genetic_algo.run()
+    print(np.mean(summary['x'][-1, :]))
     ax = plot_param_evolution(summary['x'])
 
     # Plot theoretical value (equation 12) -> Maximizes player success.
     xlim = ax.get_xlim()
     x_tilde = np.linspace(xlim[0], xlim[1], 100)
-    y_tilde = alpha * m + (2 * alpha + k) / (4 * alpha * alpha - k ** 2) * np.ones_like(x_tilde)
+    y_tilde = (alpha * m * (2 * alpha + k)) / (4 * alpha * alpha - k ** 2) * np.ones_like(x_tilde)
     plt.semilogy(x_tilde, y_tilde, color='tab:blue', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
                  lw=2, label='Theoretical value', alpha=0.7)
     ax.set_xlim(xlim)
     ax.set_ylabel('log(x) histogram')
-    ax.legend()
-    ax.set_title('Variation 3 experiment')
-
-    ax = plot_param_evolution(summary['v'], logy=False)
-    ax.set_ylabel('V histogram')
-    ax.legend()
-    ax.set_title('Variation 3 experiment')
-
-    ax = plot_param_evolution(summary['u'], logy=False)
-    ax.set_ylabel('U histogram')
     ax.legend()
     ax.set_title('Variation 3 experiment')
 

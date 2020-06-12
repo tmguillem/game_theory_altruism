@@ -18,7 +18,7 @@ def main():
 
     assert variation == 1 or variation == 2
 
-    population = 50
+    population = 200
     iterations = 250
     k = 0.5
     m = 0.5
@@ -34,6 +34,7 @@ def main():
                       mutable_parameters=mutable_params)
 
     summary = genetic_algo.run()
+    print(np.mean(summary['x'][-1, :]))
 
     ax = plot_param_evolution(summary['x'])
 
