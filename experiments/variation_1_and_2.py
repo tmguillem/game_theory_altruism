@@ -1,7 +1,8 @@
 from genetic_algorithm import GA
+from experiments.plots import plot_param_evolution
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
-import numpy as np
 
 
 def main():
@@ -34,48 +35,30 @@ def main():
 
     summary = genetic_algo.run()
 
-    # Figure out bins for histograms
-    bins_general = np.linspace(np.log(np.min(summary['x'])), np.log(np.max(summary['x'])), 100)
+    ax = plot_param_evolution(summary['x'])
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-
-    x = np.zeros(0)
-    y = np.zeros(0)
-    c = np.zeros(0)
-
-    for it in range(iterations + 1):
-
-        # Get strategies from agents
-        bins, hist = np.histogram(np.log(summary['x'][it, :]), bins=bins_general)
-        y = np.append(y, np.exp(hist[np.where(bins != 0)]))
-        x = np.append(x, np.ones_like(hist[np.where(bins != 0)]) * it)
-        c = np.append(c, bins[np.where(bins != 0)] / np.sum(bins))
-
-    ax.grid()
-
-    histograms = ax.scatter(x, y, c=c, cmap='hot', edgecolors='k')
-
-    # Plot theoretical value
+    # Plot theoretical value (equation 7) -> Maximizes player success.
     xlim = ax.get_xlim()
     x_tilde = np.linspace(xlim[0], xlim[1], 100)
     y_tilde = m / (2 - k) * np.ones_like(x_tilde)
     plt.semilogy(x_tilde, y_tilde, color='tab:blue', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
                  lw=2, label='Theoretical value', alpha=0.7)
-
-    # Plot population average
-    x_avg = np.linspace(0, iterations + 1, iterations + 1)
-    y_avg = np.mean(summary['x'], axis=1)
-    plt.semilogy(x_avg, y_avg, color='tab:green', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
-                 lw=2, label='Population average', alpha=0.7)
-    ax.legend()
     ax.set_xlim(xlim)
-
     ax.set_ylabel('log(x) histogram')
-    ax.set_xlabel('Evolution iteration')
+    ax.legend()
     ax.set_title('Variation 1 experiment' if variation == 1 else 'Variation 2 experiment')
-    cbar = fig.colorbar(histograms)
-    cbar.ax.set_ylabel('Population percentage (N={})'.format(population), rotation=270, labelpad=15)
+
+    ax = plot_param_evolution(summary['u'], logy=False)
+    # Plot theoretical value (equation 7) -> Maximizes player success.
+    xlim = ax.get_xlim()
+    x_tilde = np.linspace(xlim[0], xlim[1], 100)
+    y_tilde = m ** 2 / (2 - k) ** 2 * np.ones_like(x_tilde)
+    plt.plot(x_tilde, y_tilde, color='tab:blue', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
+             lw=2, label='Theoretical value', alpha=0.7)
+    ax.set_xlim(xlim)
+    ax.set_ylabel('U histogram')
+    ax.legend()
+    ax.set_title('Variation 1 experiment' if variation == 1 else 'Variation 2 experiment')
 
     plt.show()
 

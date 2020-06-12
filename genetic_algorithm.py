@@ -109,6 +109,7 @@ class GA:
 
         negatives = params[params < 0]
         params = params - np.min(negatives) if np.any(negatives) else params
+        params = params + 0.0005
         params = params / np.sum(params)
 
         return params
@@ -128,8 +129,10 @@ class GA:
             for pairing in pairings:
                 self.population[pairing[0]].interact(self.population[pairing[1]])
 
+            population_summary = self.population_state_summary(current_summary=population_summary)
+
             # Sort payoffs from small to large. Use as fitness
-            payoffs = np.array([agent.payoff for agent in self.population])
+            payoffs = np.array([agent.utility for agent in self.population])
             fitness = self.normalize_pdf(payoffs)
             ind = np.argsort(fitness)
 
@@ -148,7 +151,6 @@ class GA:
             self.reproduce(fitness)
 
             # Summarize state of population
-            population_summary = self.population_state_summary(current_summary=population_summary)
 
         return population_summary
 
@@ -165,7 +167,9 @@ class GA:
         if initialize:
             # Initialize the summary dictionary, as no evolution has happened yet
             current_summary = {"x": np.zeros((0, self.n)),
-                               "alpha": np.zeros((0, self.n))}
+                               "alpha": np.zeros((0, self.n)),
+                               "v": np.zeros((0, self.n)),
+                               "u": np.zeros((0, self.n))}
 
         assert isinstance(current_summary, dict)
 
@@ -175,5 +179,11 @@ class GA:
 
         current_summary["alpha"] = np.concatenate(
             (current_summary["alpha"], np.array([agent.alpha for agent in self.population])[np.newaxis, :]), axis=0)
+
+        current_summary["v"] = np.concatenate(
+            (current_summary["v"], np.array([agent.utility for agent in self.population])[np.newaxis, :]), axis=0)
+
+        current_summary["u"] = np.concatenate(
+            (current_summary["u"], np.array([agent.payoff for agent in self.population])[np.newaxis, :]), axis=0)
 
         return current_summary
