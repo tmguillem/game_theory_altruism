@@ -18,7 +18,7 @@ def main():
     assert variation == 3 or variation == 4
 
     population = 100
-    iterations = 1000
+    iterations = 500
     k = 0.5
     m = 0.5
     mu = 0.01
