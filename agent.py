@@ -21,6 +21,7 @@ class Agent:
 
         if x is not None:
             assert x >= 0
+        
         if alpha is not None:
             assert 0.5 <= alpha <= 1
         else:
@@ -46,15 +47,17 @@ class Agent:
         self.mutable_params = mutable_variables
         self.mutation_std = mu
 
-    def compute_payoff(self, x, y):
+    def compute_payoff(self, x, y,alpha, beta):
         """
         Computes the payoff of the current agent given the action of the other agent. This is equation (1) from paper.
 
         :param x: Strategy of current agent
         :param y: Strategy of interacting agent
+        :param alpha: alpha of current agent
+        :param beta: alpha of interacting agent
         """
 
-        self.payoff = x * (self.k * y + self.m - x)
+        self.payoff = self.alpha* x * (self.k * y + self.m - x) + (1-beta) * y *(self.k*x + self.m - y)
 
     def compute_utility(self, u_1, u_2):
         """
@@ -73,18 +76,8 @@ class Agent:
         :type agent_2: Agent
         """
 
-        if 'x' in self.mutable_params:
-            # If x is a mutable parameter, use the evolutionary x for the interaction
-            x = self.x
-            y = agent_2.x
-        else:
-            x, y = self.rational_strategies(agent_2)
-
-        self.x = x
-        agent_2.x = y
-
-        self.compute_payoff(x, y)
-        agent_2.compute_payoff(y, x)
+        self.compute_payoff(self.x, agent_2.x, self.alpha, agent_2.alpha)
+        agent_2.compute_payoff(agent_2.x, self.x, agent_2.alpha, self.alpha)
 
         self.compute_utility(self.payoff, agent_2.payoff)
         agent_2.compute_utility(agent_2.payoff, self.payoff)
@@ -125,24 +118,3 @@ class Agent:
             self.alpha = 0.5
         if self.alpha > 1:
             self.alpha = 1
-
-    def rational_strategies(self, agent_2):
-        """
-        Computes the strategies that the agents will take (i.e. equation 12), which assumes mutual knowledge of alpha
-        parameters, and rationality.
-        :param agent_2: partner agent in the interaction
-        :return: the optimal, rational strategies x and y (i.e. x, and x for agent_2)
-        """
-
-        beta = agent_2.alpha
-        alpha = self.alpha
-        m = self.m
-        k = self.k
-
-        def nash_eq_x(a, b):
-            return b * m * (2 * a + k) / (4 * a * b - k ** 2)
-
-        x = nash_eq_x(alpha, beta)
-        y = nash_eq_x(beta, alpha)
-
-        return x, y
