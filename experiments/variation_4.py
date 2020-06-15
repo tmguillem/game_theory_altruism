@@ -7,18 +7,18 @@ import matplotlib.patheffects as pe
 
 def main():
     """
-    This function runs variation 3.
-    In variation 3, the population of individuals is generated with randomly assigned strategies x (different for every
-    agent). Furthermore, all players are equally non-egoistic, i.e. 1/2 <= alpha < 1.
-    We let the strategies x evolve
+    This function runs variation 4.
+    In variation 4, the population of individuals is generated with randomly assigned strategies x (different for every
+    agent). Furthermore, all players are randomly assigned an alpha parameter at random within [0.5, 1], and we let the
+    strategies x and the parameters alpha evolve
     """
 
     population = 200
-    iterations = 200
+    iterations = 2000
     k = 0.5
-    m = 0.5
+    m = 10
     mu = 0.1
-    mutable_params = ['x', 'alpha']
+    mutable_params = ['alpha']
     x = None
     alpha = None
 

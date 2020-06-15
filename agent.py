@@ -73,8 +73,18 @@ class Agent:
         :type agent_2: Agent
         """
 
-        self.compute_payoff(self.x, agent_2.x)
-        agent_2.compute_payoff(agent_2.x, self.x)
+        if 'x' in self.mutable_params:
+            # If x is a mutable parameter, use the evolutionary x for the interaction
+            x = self.x
+            y = agent_2.x
+        else:
+            x, y = self.rational_strategies(agent_2)
+
+        self.x = x
+        agent_2.x = y
+
+        self.compute_payoff(x, y)
+        agent_2.compute_payoff(y, x)
 
         self.compute_utility(self.payoff, agent_2.payoff)
         agent_2.compute_utility(agent_2.payoff, self.payoff)
@@ -115,3 +125,24 @@ class Agent:
             self.alpha = 0.5
         if self.alpha > 1:
             self.alpha = 1
+
+    def rational_strategies(self, agent_2):
+        """
+        Computes the strategies that the agents will take (i.e. equation 12), which assumes mutual knowledge of alpha
+        parameters, and rationality.
+        :param agent_2: partner agent in the interaction
+        :return: the optimal, rational strategies x and y (i.e. x, and x for agent_2)
+        """
+
+        beta = agent_2.alpha
+        alpha = self.alpha
+        m = self.m
+        k = self.k
+
+        def nash_eq_x(a, b):
+            return b * m * (2 * a + k) / (4 * a * b - k ** 2)
+
+        x = nash_eq_x(alpha, beta)
+        y = nash_eq_x(beta, alpha)
+
+        return x, y

@@ -21,7 +21,13 @@ def plot_param_evolution(param, logy=True):
     iterations = param.shape[0]
     population = param.shape[1]
 
-    for it in range(iterations):
+    # To avoid too cluttered plots
+    if iterations > 200:
+        iterations_range = np.linspace(0, iterations - 1, 200, dtype=int)
+    else:
+        iterations_range = range(iterations)
+
+    for it in iterations_range:
 
         # Get strategies from agents
         if logy:

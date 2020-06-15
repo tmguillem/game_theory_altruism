@@ -46,6 +46,9 @@ class GA:
         # Percentage of lowest fit population to remove before reproduction [0, 1]
         self.x_remove = 0
 
+        # Percentage of lowest fit population to replace during reproduction [0, 1]
+        self.x_replace = 0.2
+
         self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
 
@@ -93,10 +96,14 @@ class GA:
 
         a = np.linspace(0, len(reproduction_rate) - 1, len(reproduction_rate), dtype=int)
 
-        # Sample individuals to reproduce from PDF
-        to_reproduce = np.random.choice(a, len(a), replace=True, p=reproduction_rate)
+        # Number of individuals replaced:
+        n_replaced = int(self.n * self.x_replace)
 
-        self.population = [self.population[i].reproduce() for i in to_reproduce]
+        # Sample individuals to reproduce from PDF
+        to_reproduce = np.random.choice(a, n_replaced, replace=True, p=reproduction_rate)
+
+        offspring = [self.population[i].reproduce() for i in to_reproduce]
+        self.population = self.population[n_replaced:] + offspring
 
     @staticmethod
     def normalize_pdf(params):
@@ -129,6 +136,7 @@ class GA:
             for pairing in pairings:
                 self.population[pairing[0]].interact(self.population[pairing[1]])
 
+            # Summarize state of population
             population_summary = self.population_state_summary(current_summary=population_summary)
 
             # Sort payoffs from small to large. Use as fitness
@@ -136,12 +144,17 @@ class GA:
             fitness = self.normalize_pdf(payoffs)
             ind = np.argsort(fitness)
 
-            # Remove worst x% of population
-            ind = ind[int(self.n * self.x_remove):]
+            # Sort individuals in terms of increasing fitness
             self.population = [self.population[i] for i in ind]
+            fitness = fitness[ind]
+
+            # Remove worst x% of population
+            n_remove = int(self.n * self.x_remove)
+            self.population = self.population[n_remove:]
+            fitness = fitness[n_remove:]
 
             # Distribute lost fitness of removed individuals among surviving individuals
-            fitness = fitness[ind] + (1 - np.sum(fitness[ind])) / len(ind)
+            fitness += (1 - np.sum(fitness)) / len(fitness)
 
             # Correct numerical error
             if np.any(fitness[fitness < 0]):
@@ -149,8 +162,6 @@ class GA:
 
             # Reproduce population using the fitness score as reproduction probability
             self.reproduce(fitness)
-
-            # Summarize state of population
 
         return population_summary
 
