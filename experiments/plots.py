@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
+import matplotlib.lines as mlines
+import matplotlib.transforms as mtransforms
 import numpy as np
+from genetic_algorithm import GA
+
 
 
 def plot_param_evolution(param, logy=True):
@@ -60,3 +64,62 @@ def plot_param_evolution(param, logy=True):
     cbar.ax.set_ylabel('Population percentage (N={})'.format(population), rotation=270, labelpad=15)
 
     return ax
+
+def iterate_ga(mutable_parameters, vals_k=None, vals_m=None, x_init=None, alpha_init=None, num = 10):
+    """
+    Iterate over the genetic algorithm with varying k and m parameters
+    :return: a list of summaries of the GA
+    """
+    if vals_k is None:    
+        vals_k = np.linspace(-0.99,0.99, num=num)
+    if vals_m is None:    
+        vals_m = np.logspace(-10,10, base = 2, num=num)
+    vals = np.dstack(np.meshgrid(vals_k, vals_m)).reshape(-1, 2)
+    n_vals = len(vals)
+    summary_list = []
+    
+    for i in range(n_vals):
+        genetic_algo = GA(n_population=100, m_iterations=200,
+                          k=vals[i,0], m=vals[i,1], mu=0.1, 
+                          x_init=x_init, alpha_init=alpha_init,
+                          mutable_parameters=mutable_parameters)
+        summary = genetic_algo.run()
+        summary_list.append(summary)
+    
+    return vals, summary_list
+
+
+def calc_optimal_payoff(m, k):
+    return (m**2)/(4*(1-k))
+
+def plot_payoff_convergence(act, exp):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    line = mlines.Line2D([0, 1], [0, 1], color='red')
+    
+    ax.set_xscale('log', basex=2)
+    ax.set_yscale('log', basey=2)
+    transform = ax.transAxes
+    line.set_transform(transform)
+    ax.add_line(line)
+    ax.scatter(x=act, y=exp)
+    ax.set_xlabel('Actual mean utility')
+    ax.set_ylabel('Expected mean utility')
+    
+    return ax
+    
+def plot_prop1_convergence(vals_k, diff_u):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    
+    ax.set_yscale('log', basey=2)
+    #ax.set_yscale('symlog')
+    ax.plot(vals_k, diff_u, '-o')
+    ax.set_xlabel('k')
+    ax.set_ylabel('U_alt - U_ego')
+
+    
+    return ax
+    
+
