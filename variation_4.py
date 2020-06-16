@@ -17,7 +17,7 @@ def main():
     iterations = 1000
     k = 0.5
     m = 10
-    mu = 0.01
+    mu = 0.05
     mutable_params = ['alpha']
     x = None
     alpha = None
