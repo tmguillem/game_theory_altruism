@@ -15,7 +15,7 @@ def main():
 
     population = 200
     iterations = 1000
-    k = 0.01
+    k = 0.5
     m = 10
     mu = 0.01
     mutable_params = ['alpha']

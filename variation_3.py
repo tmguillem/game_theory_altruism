@@ -14,12 +14,13 @@ def main():
     """
 
     population = 200
-    iterations = 200
+    iterations = 1000
     k = 0.5
     m = 0.5
     mu = 0.1
     alpha = 0.5
-    mutable_params = ['x']
+    mutable_params = None #['x']
+    
     x = None
     reprod_method="utility"
 
