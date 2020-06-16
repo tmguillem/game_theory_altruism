@@ -15,9 +15,9 @@ def main():
 
     population = 200
     iterations = 1000
-    k = 0.5
+    k = 0.01
     m = 10
-    mu = 0.1
+    mu = 0.01
     mutable_params = ['alpha']
     x = None
     alpha = None
@@ -36,6 +36,11 @@ def main():
     ax.set_title('Variation 4 experiment - x evolution')
 
     ax = plot_param_evolution(summary['alpha'], logy=False)
+    xlim = ax.get_xlim()
+    x_tilde = np.linspace(xlim[0], xlim[1], 100)
+    y_tilde = (2-k)/2 * np.ones_like(x_tilde)
+    plt.plot(x_tilde, y_tilde, color='tab:blue', path_effects=[pe.Stroke(linewidth=5, foreground='w'), pe.Normal()],
+             lw=2, label='Theoretical value', alpha=0.7)
     ax.set_ylabel('alpha histogram')
     ax.legend()
     ax.set_title('Variation 4 experiment - alpha evolution')

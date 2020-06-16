@@ -56,7 +56,8 @@ class Agent:
         :param beta: Alpha of interacting agent
         """
 
-        self.payoff = alpha* x * (self.k * y + self.m - x) + (1-beta)*y*(self.k*x + self.m -y)
+        #self.payoff = alpha* x * (self.k * y + self.m - x) + (1-beta)*y*(self.k*x + self.m -y)
+        self.payoff = x * (self.k * y + self.m - x)
 
     def compute_utility(self, u_1, u_2):
         """
@@ -80,7 +81,7 @@ class Agent:
             x = self.x
             y = agent_2.x
         else:
-            x, y = self.rational_strategies(agent_2)
+           x, y = self.rational_strategies(agent_2)
 
         self.x = x
         agent_2.x = y
