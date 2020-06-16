@@ -19,7 +19,7 @@ def main():
     m = 0.5
     mu = 0.1
     alpha = 0.5
-    mutable_params = None #['x']
+    mutable_params = None
     
     x = None
     reprod_method="utility"
