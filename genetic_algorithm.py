@@ -8,7 +8,7 @@ class GA:
     Class that implements the evolutionary algorithm (genetic algorithm, GA)
     """
 
-    def __init__(self, n_population, m_iterations, k, m, mu, x_init, alpha_init, mutable_parameters, reprod_method):
+    def __init__(self, n_population, m_iterations, k, m, mu, x_init, alpha_init, mutable_parameters, reprod_method, rational):
         """
         Initializes the genetic algorithm with a population of individuals.
         :param n_population: number of individuals in the simulation. Will remain constant
@@ -32,6 +32,8 @@ class GA:
         #reproduction method
         self.reprod_method = reprod_method
 
+        #rationality of actors
+        self.rational = rational
         # Externality
         self.k = k
         # Self-utility
@@ -62,7 +64,7 @@ class GA:
         """
 
         return [Agent(k=self.k, m=self.m, mu=self.mutation, x=self.x, alpha=self.alpha,
-                      mutable_variables=self.mutable_params)
+                      mutable_variables=self.mutable_params, rational = self.rational)
                 for _ in range(self.n)]
 
     def make_pairs(self, algorithm):

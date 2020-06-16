@@ -3,7 +3,7 @@ import copy
 
 
 class Agent:
-    def __init__(self, k, m, mu=0.1, x=None, alpha=None, mutable_variables=None):
+    def __init__(self, k, m, mu=0.1, x=None, alpha=None, mutable_variables=None, rational=None):
         """
         Initializes an agent object for the Genetic Algorithm simulation.
 
@@ -36,6 +36,7 @@ class Agent:
         # Agent hyperparameters (can't be mutated)
         self.k = k
         self.m = m
+        self.rational = rational
 
         self.payoff = 0
         self.utility = 0
@@ -56,8 +57,11 @@ class Agent:
         :param beta: Alpha of interacting agent
         """
 
-        #self.payoff = alpha* x * (self.k * y + self.m - x) + (1-beta)*y*(self.k*x + self.m -y)
-        self.payoff = x * (self.k * y + self.m - x)
+        if self.rational:
+            self.payoff = x * (self.k * y + self.m - x)
+        else:
+            self.payoff = alpha* x * (self.k * y + self.m - x) + (1-beta)*y*(self.k*x + self.m -y)
+            
 
     def compute_utility(self, u_1, u_2):
         """
@@ -75,14 +79,13 @@ class Agent:
         :param agent_2: The agent with whom the current agent will be interacting
         :type agent_2: Agent
         """
+        
 
-        if 'x' in self.mutable_params:
-            # If x is a mutable parameter, use the evolutionary x for the interaction
+        if self.rational:
+            x, y = self.rational_strategies(agent_2)
+        else: 
             x = self.x
             y = agent_2.x
-        else:
-           x, y = self.rational_strategies(agent_2)
-
         self.x = x
         agent_2.x = y
         

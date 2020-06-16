@@ -17,6 +17,7 @@ def get_argument_parser():
     parser.add_argument('--alpha', type=float, default=1.0, help='Alpha (altruism) parameter. alpha=1 is an egoistic '
                                                                  'player. alpha=0.5 cares as much for others as for '
                                                                  'himself.')
+    parser.add_argument('--rational', type=boolean, default = false, help = 'whether agents are rational or not')
     parser.add_argument('--reprod_method', type=str, default = "utility", help = 'Reproduction method')
 
     parser.add_argument('--alpha_mutable', dest='alpha_mutable',

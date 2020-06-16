@@ -17,16 +17,17 @@ def main():
     iterations = 1000
     k = 0.5
     m = 10
-    mu = 0.05
+    mu = 0.01
     mutable_params = ['alpha']
     x = None
     alpha = None
     reprod_method = "payoff"
+    rational = False
 
     genetic_algo = GA(n_population=population, m_iterations=iterations,
                       k=k, m=m, mu=mu,
                       x_init=x, alpha_init=alpha,
-                      mutable_parameters=mutable_params,reprod_method = reprod_method)
+                      mutable_parameters=mutable_params,reprod_method = reprod_method,rational = rational)
 
     summary = genetic_algo.run()
     print(np.mean(summary['x'][-1, :]))

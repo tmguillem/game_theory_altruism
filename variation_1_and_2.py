@@ -26,13 +26,14 @@ def main():
     alpha = 1
     mutable_params = ['x']
     reprod_method="utility"
+    rational = False
 
     x = 0.9 if variation == 1 else None
 
     genetic_algo = GA(n_population=population, m_iterations=iterations,
                       k=k, m=m, mu=mu,
                       x_init=x, alpha_init=alpha,
-                      mutable_parameters=mutable_params,reprod_method=reprod_method)
+                      mutable_parameters=mutable_params,reprod_method=reprod_method, rational = rational)
 
     summary = genetic_algo.run()
     print(np.mean(summary['x'][-1, :]))
