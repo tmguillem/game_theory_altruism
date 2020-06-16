@@ -83,7 +83,7 @@ def iterate_ga(mutable_parameters, vals_k=None, vals_m=None, x_init=None, alpha_
                           k=vals[i,0], m=vals[i,1], mu=0.1, 
                           x_init=x_init, alpha_init=alpha_init,
                           mutable_parameters=mutable_parameters)
-        summary = genetic_algo.run()
+        summary, _ = genetic_algo.run()
         summary_list.append(summary)
     
     return vals, summary_list
@@ -104,8 +104,8 @@ def plot_payoff_convergence(act, exp):
     line.set_transform(transform)
     ax.add_line(line)
     ax.scatter(x=act, y=exp)
-    ax.set_xlabel('Actual mean utility')
-    ax.set_ylabel('Expected mean utility')
+    ax.set_xlabel('Mean actual utility')
+    ax.set_ylabel('Expected utility')
     
     return ax
     
@@ -120,6 +120,48 @@ def plot_prop1_convergence(vals_k, diff_u):
     ax.set_ylabel('U_alt - U_ego')
 
     
-    return ax
+    return 
+
+def plot_prop2_convergence(population, n_interactions, pairings_summary, summary, iterations):
     
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_xlim([0, 0.5])
+    ax.set_xlabel('beta - alpha')
+    ax.set_ylabel('U_egoist - U_altruist')
+    ymax = 0
+    
+    n_interactions = int(population/2)
+    a = np.zeros(n_interactions)
+    b = np.zeros(n_interactions)
+    u1 = np.zeros(n_interactions)
+    u2 = np.zeros(n_interactions)
+    
+    #for i in range(iterations):
+    for i in range(iterations):
+        p1 = pairings_summary[i,:,0].astype(int)
+        p2 = pairings_summary[i,:,1].astype(int)
+        a_p1 = summary['alpha'][i+1,:][p1]
+        a_p2 = summary['alpha'][i+1,:][p2]
+        u_p1 = summary['u'][i+1,:][p1]
+        u_p2 = summary['u'][i+1,:][p2]
+        
+        for j in range(n_interactions):
+            if a_p1[j] < a_p2[j]:
+                a[j] = a_p1[j]
+                b[j] = a_p2[j]
+                u1[j] = u_p1[j]
+                u2[j] = u_p2[j]
+            else:
+                a[j] = a_p2[j]
+                b[j] = a_p1[j]
+                u1[j] = u_p2[j]
+                u2[j] = u_p1[j]
+        if max(u2-u1) > ymax:
+            ymax = max(u2-u1)
+        ax.set_ylim([0, ymax])
+        ax.scatter(b-a, (u2-u1), c='black')
+    
+    return ax
+
 

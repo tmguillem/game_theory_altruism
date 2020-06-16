@@ -27,7 +27,7 @@ def main():
                       x_init=x, alpha_init=alpha,
                       mutable_parameters=mutable_params)
 
-    summary = genetic_algo.run()
+    summary, _ = genetic_algo.run()
     print(np.mean(summary['x'][-1, :]))
     
     ax = plot_param_evolution(summary['x'])
