@@ -15,8 +15,8 @@ def main():
 
     population = 200
     iterations = 2000
-    k = 0.5
-    m = 10
+    k = 0.3
+    m = 0.75
     mu = 0.1
     mutable_params = ['alpha']
     x = None
@@ -27,8 +27,9 @@ def main():
                       x_init=x, alpha_init=alpha,
                       mutable_parameters=mutable_params)
 
-    summary = genetic_algo.run()
+    summary, _ = genetic_algo.run()
     print(np.mean(summary['x'][-1, :]))
+    
     ax = plot_param_evolution(summary['x'])
     ax.set_ylabel('log(x) histogram')
     ax.legend()
@@ -38,6 +39,12 @@ def main():
     ax.set_ylabel('alpha histogram')
     ax.legend()
     ax.set_title('Variation 4 experiment - alpha evolution')
+    
+    ax = plot_param_evolution(summary['u'], logy=False)
+    ax.set_ylabel('U histogram')
+    ax.legend()
+    ax.set_title('Variation 4 experiment - U evolution')
+    print(np.mean(summary['u'], axis = 1))
 
     plt.show()
 

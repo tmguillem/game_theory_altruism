@@ -127,8 +127,9 @@ class GA:
         """
 
         population_summary = self.population_state_summary(initialize=True)
+        pairings_summary = np.zeros((self.m_iter, int(self.n/2), 2))
 
-        for _ in tqdm(range(self.m_iter)):
+        for i in tqdm(range(self.m_iter)):
 
             pairings = self.make_pairs(algorithm="random")
 
@@ -138,10 +139,11 @@ class GA:
 
             # Summarize state of population
             population_summary = self.population_state_summary(current_summary=population_summary)
+            pairings_summary[i] = pairings
 
             # Sort payoffs from small to large. Use as fitness
-            payoffs = np.array([agent.utility for agent in self.population])
-            fitness = self.normalize_pdf(payoffs)
+            fitness = np.array([agent.utility for agent in self.population])
+            fitness = self.normalize_pdf(fitness)
             ind = np.argsort(fitness)
 
             # Sort individuals in terms of increasing fitness
@@ -163,7 +165,7 @@ class GA:
             # Reproduce population using the fitness score as reproduction probability
             self.reproduce(fitness)
 
-        return population_summary
+        return population_summary, pairings_summary
 
     def population_state_summary(self, initialize=False, current_summary=None):
         """
