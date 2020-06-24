@@ -1,12 +1,14 @@
 from genetic_algorithm import GA
-from experiments.plots import iterate_ga, calc_optimal_payoff, plot_payoff_convergence, \
-    plot_prop1_convergence, plot_prop2_convergence
+from experiments.plots import iterate_ga, plot_payoff_convergence, plot_prop1_convergence, plot_prop2_convergence
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
 
 
 def main():
-    
+    font = {'family': 'normal', 'size': 15}
+    matplotlib.rc('font', **font)
+
     # 1. Verify convergence to global maximum over different parameter values
     # Mutation in altruism allows population to move to a utility maximising frontier
     vals, summary_list = iterate_ga(mutable_parameters=['alpha'])
@@ -14,20 +16,27 @@ def main():
     iters = len(summary_list)
     act_u = np.zeros(iters)
     exp_u = np.zeros(iters)
+    act_x = np.zeros(iters)
+    exp_x = np.zeros(iters)
     
     for i in range(iters):
         mean_u = np.mean(summary_list[i]['u'], axis=1)
+        mean_x = np.mean(summary_list[i]['x'], axis=1)
         act_u[i] = np.mean(mean_u[-100:])
-        exp_u[i] = calc_optimal_payoff(m=vals[i, 1], k=vals[i, 0])
+        act_x[i] = np.mean(mean_x[-100:])
 
-    plot_payoff_convergence(act_u, exp_u)
+        # Equation 4: theoretical strategy x that maximizes joint payoff
+        exp_u[i] = (vals[i, 1] ** 2) / (4 * (1 - vals[i, 0]))
+        exp_x[i] = vals[i, 1] / (2 - 2 * vals[i, 0])
+
+    plot_payoff_convergence(act_u, exp_u, act_x, exp_x)
     
     # 2. Verify proposition 1 for a fixed m
     # Population of altruistic players reaches higher success than egoists
     # Differences are greater the larger the absolute value of k
 
     # Keep m value constant
-    m = 0.2
+    m = 10
     vals_alt, summary_list_alt = iterate_ga(vals_m=np.array(m), alpha_init=None, mutable_parameters=['alpha'], num=50)
     vals_ego, summary_list_ego = iterate_ga(vals_m=np.array(m), alpha_init=1, mutable_parameters=[], num=50)
 

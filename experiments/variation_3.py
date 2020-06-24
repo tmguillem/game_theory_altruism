@@ -3,6 +3,7 @@ from experiments.plots import plot_param_evolution
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
+import matplotlib
 
 
 def main():
@@ -12,13 +13,15 @@ def main():
     agent). Furthermore, all players are equally non-egoistic, i.e. 1/2 <= alpha < 1.
     We let the strategies x evolve
     """
+    font = {'family': 'normal', 'size': 15}
+    matplotlib.rc('font', **font)
 
     population = 200
-    iterations = 200
+    iterations = 250
     k = 0.5
     m = 0.5
     mu = 0.1
-    alpha = 0.5
+    alpha = 0.8
     mutable_params = ['x']
     x = None
 
@@ -27,7 +30,9 @@ def main():
                       x_init=x, alpha_init=alpha,
                       mutable_parameters=mutable_params)
 
-    summary = genetic_algo.run()
+    alpha = 0.75 if alpha is None else alpha
+
+    summary, _ = genetic_algo.run()
     print(np.mean(summary['x'][-1, :]))
     ax = plot_param_evolution(summary['x'])
 
@@ -40,7 +45,9 @@ def main():
     ax.set_xlim(xlim)
     ax.set_ylabel('log(x) histogram')
     ax.legend()
-    ax.set_title('Variation 3 experiment')
+    ax.set_title('Altruistic equilibrium')
+
+    ax = plot_param_evolution(summary['alpha'], logy=False)
 
     plt.show()
 

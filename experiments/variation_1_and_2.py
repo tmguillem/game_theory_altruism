@@ -3,6 +3,7 @@ from experiments.plots import plot_param_evolution
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
+import matplotlib
 
 
 def main():
@@ -12,6 +13,9 @@ def main():
     In variation 2, the population starts with randomly assigned strategies x (different for every agent).
     In both cases, we contemplate egoistic players, i.e.: Alpha=1, and only let the strategies x evolve.
     """
+
+    font = {'family': 'normal', 'size': 15}
+    matplotlib.rc('font', **font)
 
     # Change to 1 or 2 for variations 1 or 2
     variation = 2
@@ -33,7 +37,7 @@ def main():
                       x_init=x, alpha_init=alpha,
                       mutable_parameters=mutable_params)
 
-    summary = genetic_algo.run()
+    summary, _ = genetic_algo.run()
     print(np.mean(summary['x'][-1, :]))
 
     ax = plot_param_evolution(summary['x'])
@@ -47,7 +51,7 @@ def main():
     ax.set_xlim(xlim)
     ax.set_ylabel('log(x) histogram')
     ax.legend()
-    ax.set_title('Variation 1 experiment' if variation == 1 else 'Variation 2 experiment')
+    ax.set_title('Egoistic equilibrium')
 
     ax = plot_param_evolution(summary['u'], logy=False)
     # Plot theoretical value (equation 7) -> Maximizes player success.

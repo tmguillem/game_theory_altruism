@@ -141,7 +141,7 @@ class GA:
             population_summary = self.population_state_summary(current_summary=population_summary)
             pairings_summary[i] = pairings
 
-            # Sort payoffs from small to large. Use as fitness
+            # Sort utilities from small to large. Use as fitness value
             fitness = np.array([agent.utility for agent in self.population])
             fitness = self.normalize_pdf(fitness)
             ind = np.argsort(fitness)

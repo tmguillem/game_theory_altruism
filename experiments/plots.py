@@ -59,7 +59,7 @@ def plot_param_evolution(param, logy=True):
 
     ax.set_xlabel('Evolution iteration')
     cbar = fig.colorbar(histograms)
-    cbar.ax.set_ylabel('Population percentage (N={})'.format(population), rotation=270, labelpad=15)
+    cbar.ax.set_ylabel('Population percentage (N={})'.format(population), rotation=270, labelpad=19)
 
     return ax
 
@@ -90,13 +90,14 @@ def iterate_ga(mutable_parameters, vals_k=None, vals_m=None, x_init=None, alpha_
     return vals, summary_list
 
 
-def calc_optimal_payoff(m, k):
-    return (m**2)/(4*(1-k))
-
-
-def plot_payoff_convergence(act, exp):
+def plot_payoff_convergence(act_u, exp_u, act_x, exp_x):
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title('Symmetric optimum joint success maximization')
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax = fig.add_subplot(121)
     
     line = mlines.Line2D([0, 1], [0, 1], color='red', label='x=y')
     
@@ -105,10 +106,22 @@ def plot_payoff_convergence(act, exp):
     transform = ax.transAxes
     line.set_transform(transform)
     ax.add_line(line)
-    ax.scatter(x=act, y=exp, label='experiments')
-    ax.set_xlabel('Average empirical utility')
-    ax.set_ylabel('Expected utility')
-    ax.set_title(r'Proposition 1 experiment for $k\in(-1, 1)$, $m\in[2^{-10}, 2^{10}]$')
+    ax.scatter(x=act_u, y=exp_u, label='U convergence')
+    ax.set_xlabel(r'Average empirical payoff $U$')
+    ax.set_ylabel(r'Analytical equilibrium payoff: $\hat{U}$')
+    ax.legend()
+
+    ax = fig.add_subplot(122)
+    line = mlines.Line2D([0, 1], [0, 1], color='red', label='x=y')
+
+    ax.set_xscale('log', basex=2)
+    ax.set_yscale('log', basey=2)
+    transform = ax.transAxes
+    line.set_transform(transform)
+    ax.add_line(line)
+    ax.scatter(x=act_x, y=exp_x, label='x convergence')
+    ax.set_xlabel(r'Average empirical strategy $x$')
+    ax.set_ylabel(r'Analytic equilibrium strategy $\hat{x}$')
     ax.legend()
 
 
