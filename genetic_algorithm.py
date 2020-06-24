@@ -8,7 +8,7 @@ class GA:
     Class that implements the evolutionary algorithm (genetic algorithm, GA)
     """
 
-    def __init__(self, n_population, m_iterations, k, m, mu, x_init, alpha_init, mutable_parameters, reprod_method, rational):
+    def __init__(self, n_population, m_iterations, k, m, mu, x_init, alpha_init, mutable_parameters, reprod_method, rational, reciprocal):
         """
         Initializes the genetic algorithm with a population of individuals.
         :param n_population: number of individuals in the simulation. Will remain constant
@@ -26,7 +26,7 @@ class GA:
         """
 
         assert divmod(n_population, 2)[1] == 0, "Population must be an even number so n/2 pairings can bee made."
-
+        self.reciprocal = reciprocal
         self.n = n_population
         self.m_iter = m_iterations
         #reproduction method
@@ -52,10 +52,11 @@ class GA:
         self.x_remove = 0
 
         # Percentage of lowest fit population to replace during reproduction [0, 1]
-        self.x_replace = 0.2
+        self.x_replace = 0.05
 
         self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
+       
 
     def initialize_population(self):
         """
@@ -64,8 +65,8 @@ class GA:
         """
 
         return [Agent(k=self.k, m=self.m, mu=self.mutation, x=self.x, alpha=self.alpha,
-                      mutable_variables=self.mutable_params, rational = self.rational)
-                for _ in range(self.n)]
+                      mutable_variables=self.mutable_params, rational = self.rational, marker = i, memory = [], reciprocal = self.reciprocal)
+                for i in range(self.n)]
 
     def make_pairs(self, algorithm):
         """

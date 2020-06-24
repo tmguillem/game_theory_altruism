@@ -3,7 +3,7 @@ import copy
 
 
 class Agent:
-    def __init__(self, k, m, mu=0.1, x=None, alpha=None, mutable_variables=None, rational=None):
+    def __init__(self, k, m, mu=0.1, x=None, alpha=None, mutable_variables=None, rational=None, marker = None, memory = [], reciprocal = None):
         """
         Initializes an agent object for the Genetic Algorithm simulation.
 
@@ -32,7 +32,9 @@ class Agent:
         # Agent parameters (may be mutated)
         self.alpha = alpha
         self.x = x if x is not None else np.exp(np.random.uniform(0, 2))
-
+        self.memory = memory
+        self.marker = marker
+        self.reciprocal = reciprocal
         # Agent hyperparameters (can't be mutated)
         self.k = k
         self.m = m
@@ -40,12 +42,20 @@ class Agent:
 
         self.payoff = 0
         self.utility = 0
+        
 
         # Mutation stuff
         for var in mutable_variables:
             assert var in ["alpha", "x"]
         self.mutable_params = mutable_variables
         self.mutation_std = mu
+
+    def remember(self, agent_2): #the altruist incorporates the egoist into their memory
+        if agent_2.alpha<self.alpha:
+            self.memory.append(agent_2.marker)
+        if agent_2.alpha>self.alpha:
+            agent_2.memory.append(self.marker)
+        
 
     def compute_payoff(self, x, y, alpha, beta):
         """
@@ -88,10 +98,24 @@ class Agent:
             y = agent_2.x
         self.x = x
         agent_2.x = y
+
+        if (self.marker in agent_2.memory): #if agent 2 remembers agent 1 as an egoist, he will mimic
+            beta = self.alpha
+            alpha = self.alpha
+
+        elif (agent_2.marker in self.memory): #same but the other way around
+            beta = agent_2.alpha
+            alpha = agent_2.alpha
+        else: #if they havent interacted before
+            beta = agent_2.alpha
+            alpha = self.alpha
+            if self.reciprocal:
+                self.remember(agent_2)
+        
         
 
-        self.compute_payoff(x, y, self.alpha, agent_2.alpha)
-        agent_2.compute_payoff(y, x, agent_2.alpha, self.alpha)
+        self.compute_payoff(x, y, alpha, beta)
+        agent_2.compute_payoff(y, x, beta, alpha)
 
         self.compute_utility(self.payoff, agent_2.payoff)
         agent_2.compute_utility(agent_2.payoff, self.payoff)
@@ -119,6 +143,8 @@ class Agent:
         offspring.check_param_constraints()
 
         return offspring
+    
+
 
     def check_param_constraints(self):
         """
@@ -140,9 +166,16 @@ class Agent:
         :param agent_2: partner agent in the interaction
         :return: the optimal, rational strategies x and y (i.e. x, and x for agent_2)
         """
+        if (self.marker in agent_2.memory): #if agent 2 remembers agent 1 as an egoist, he will mimic
+            beta = self.alpha
+            alpha = self.alpha
 
-        beta = agent_2.alpha
-        alpha = self.alpha
+        elif (agent_2.marker in self.memory): #same but the other way around
+            beta = agent_2.alpha
+            alpha = agent_2.alpha
+        else: #if they havent interacted before
+            beta = agent_2.alpha
+            alpha = self.alpha
         m = self.m
         k = self.k
 
