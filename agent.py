@@ -51,10 +51,12 @@ class Agent:
         self.mutation_std = mu
 
     def remember(self, agent_2): #the altruist incorporates the egoist into their memory
-        if agent_2.alpha<self.alpha:
+        
+        if agent_2.alpha>self.alpha and agent_2.marker not in self.memory:
             self.memory.append(agent_2.marker)
-        if agent_2.alpha>self.alpha:
+        if agent_2.alpha<self.alpha and self.marker not in agent_2.memory:
             agent_2.memory.append(self.marker)
+        
         
 
     def compute_payoff(self, x, y, alpha, beta):
@@ -99,11 +101,11 @@ class Agent:
         self.x = x
         agent_2.x = y
 
-        if (self.marker in agent_2.memory): #if agent 2 remembers agent 1 as an egoist, he will mimic
+        if (self.marker in agent_2.memory and self.alpha>agent_2.alpha): #if agent 2 remembers agent 1 as an egoist, he will mimic
             beta = self.alpha
             alpha = self.alpha
 
-        elif (agent_2.marker in self.memory): #same but the other way around
+        elif (agent_2.marker in self.memory and self.alpha<agent_2.alpha): #same but the other way around
             beta = agent_2.alpha
             alpha = agent_2.alpha
         else: #if they havent interacted before
@@ -166,11 +168,11 @@ class Agent:
         :param agent_2: partner agent in the interaction
         :return: the optimal, rational strategies x and y (i.e. x, and x for agent_2)
         """
-        if (self.marker in agent_2.memory): #if agent 2 remembers agent 1 as an egoist, he will mimic
+        if (self.marker in agent_2.memory  and self.alpha>agent_2.alpha): #if agent 2 remembers agent 1 as an egoist, he will mimic
             beta = self.alpha
             alpha = self.alpha
 
-        elif (agent_2.marker in self.memory): #same but the other way around
+        elif (agent_2.marker in self.memory  and self.alpha<agent_2.alpha): #same but the other way around
             beta = agent_2.alpha
             alpha = agent_2.alpha
         else: #if they havent interacted before

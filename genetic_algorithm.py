@@ -52,7 +52,7 @@ class GA:
         self.x_remove = 0
 
         # Percentage of lowest fit population to replace during reproduction [0, 1]
-        self.x_replace = 0.05
+        self.x_replace = 0.2
 
         self.mutable_params = mutable_parameters
         self.population = self.initialize_population()
