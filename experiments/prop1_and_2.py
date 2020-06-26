@@ -29,6 +29,14 @@ def main():
         exp_u[i] = (vals[i, 1] ** 2) / (4 * (1 - vals[i, 0]))
         exp_x[i] = vals[i, 1] / (2 - 2 * vals[i, 0])
 
+    plt.figure()
+    plt.scatter(np.arange(1, len(act_u) + 1),
+                np.array([np.mean(summary['alpha'][-100, :], 0) for summary in summary_list]))
+    plt.ylim([0.45, 1.0])
+    plt.xlabel('Hyperparameter $(k, m)$ setup #')
+    plt.ylabel(r'Mean $\alpha$ convergence')
+    plt.title(r'Symmetric optimum mean $\alpha$')
+
     plot_payoff_convergence(act_u, exp_u, act_x, exp_x)
     
     # 2. Verify proposition 1 for a fixed m
